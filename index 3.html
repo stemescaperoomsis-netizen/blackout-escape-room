@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BLACKOUT // Emergency Terminal</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#020504;color:#39ff88;font:15px "Courier New",monospace;min-height:100vh}
+body:after{content:"";position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(#fff0 0 3px,#ffffff08 4px);z-index:50}
+header{padding:18px 5%;border-bottom:1px solid #173522;display:flex;justify-content:space-between}.logo{font-size:38px;font-weight:bold;letter-spacing:7px;text-shadow:0 0 12px #39ff88}.status{font-size:11px;text-align:right;color:#79b994}
+main{max-width:1050px;margin:auto;padding:22px 5%}.panel{border:1px solid #173522;background:#06100a;padding:18px;margin:15px 0;box-shadow:0 0 20px #000}.small{font-size:12px;color:#79b994;line-height:1.6}.danger{color:#ff405c}.warning{color:#ffe66d}.unlock{color:#39ff88}
+#progress{display:flex;gap:5px;flex-wrap:wrap}.step{padding:8px 10px;border:1px solid #173522;color:#507b61;font-size:11px}.step.active{border-color:#39ff88;color:#39ff88}.step.done{background:#39ff88;color:#001508}
+input,button{font:inherit;background:#020804;color:#39ff88;border:1px solid #39ff88;padding:10px 12px}input{width:min(700px,100%)}button{cursor:pointer;margin:5px 4px 5px 0}button:hover{background:#39ff88;color:#001508}.row{display:flex;gap:7px;flex-wrap:wrap}
+.codebox{background:#000;border:1px dashed #28613e;padding:13px;margin:12px 0;letter-spacing:2px;line-height:1.6}.result{border-left:3px solid #39ff88;background:#030a06;padding:12px;margin-top:10px}.result h3{margin:0 0 7px}.badge{font-size:10px;border:1px solid #39ff88;padding:2px 5px}
+#level3,#level4{display:none}.locked{opacity:.55}#terminalLog{max-height:170px;overflow:auto;background:#000;border:1px solid #173522;padding:10px;font-size:12px;line-height:1.6}
+#boot{position:fixed;inset:0;background:#000;z-index:100;padding:12vh 9vw;line-height:1.8}.cursor{animation:blink 1s steps(2,end) infinite}@keyframes blink{50%{opacity:0}}
+#finalOverlay{position:fixed;inset:0;background:#000;z-index:90;display:flex;align-items:center;justify-content:center;text-align:center;padding:25px}.finalBox{border:1px solid #39ff88;padding:35px;max-width:700px;box-shadow:0 0 45px #39ff8826}.finalBox h1{font-size:clamp(35px,7vw,70px);letter-spacing:5px}
+footer{text-align:center;color:#315d43;font-size:11px;margin:35px 0}.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div id="boot">BLACKOUT EMERGENCY TERMINAL v4.7<br>INITIALISING POWER GRID...<br>CHECKING SECURITY SYSTEM...<br>RECOVERY PROTOCOL FOUND.<br>WARNING: FACILITY OFFLINE<br>BOOT SEQUENCE COMPLETE<span class="cursor">_</span></div>
+
+<header><div class="logo">BLACKOUT</div><div class="status">FACILITY: OFFLINE<br>ACCESS: RESTRICTED</div></header>
+<main>
+<div id="progress">
+<div id="p2" class="step active">LEVEL 2 // POWER</div><div id="p3" class="step">LEVEL 3 // BINARY</div><div id="p4" class="step">LEVEL 4 // SIGNAL</div><div id="pc" class="step">SYSTEM RESTORED</div>
+</div>
+
+<section id="level2" class="panel">
+<h2>LEVEL 2 // POWER RESTORATION</h2>
+<p>The facility is dark. The exit light is connected to a broken circuit.</p>
+<p class="small">PHYSICAL TASK: Use the circuit tester. Test the objects in the room. Conductors complete the circuit; insulators do not.</p>
+<div class="codebox">CONDUCTORS: copper / aluminium / steel paperclip / coin / graphite<br>INSULATORS: plastic / rubber / wood / glass</div>
+<p class="warning">When the correct physical circuit is completed, the exit light reveals:</p>
+<div class="codebox">ACCESS THE TERMINAL</div>
+<button onclick="powerRestored()">POWER RESTORED</button><p id="powerMsg"></p>
+</section>
+
+<section id="level3">
+<div class="panel">
+<h2>LEVEL 3 // BINARY TERMINAL</h2>
+<p>Power restored. Terminal access granted.</p><p class="small">Search the database. Some records are classified. Some clues are physical.</p>
+<div class="row"><input id="searchBox" placeholder="ENTER SEARCH TERM..."><button onclick="searchDB()">SEARCH</button></div><div id="results"></div>
+</div>
+<div class="panel">
+<h2>5-BIT BINARY DECODER</h2><p class="small">Rule: A=1, B=2 ... Z=26. Enter 5-bit groups separated by spaces.</p>
+<div class="row"><input id="binaryInput" placeholder="01000 01001 00100 00101"><button onclick="decodeBinary()">DECODE</button></div>
+<div id="decodeOutput" class="codebox">WAITING...</div>
+</div>
+<div id="securityPanel" class="panel locked">
+<h2>SECURITY GATE</h2><p class="small">Locked until the binary chain is solved.</p>
+<div class="row"><input id="accessInput" placeholder="ACCESS CODE"><button onclick="openGate()">SUBMIT</button></div><div id="accessMsg"></div>
+</div>
+</section>
+
+<section id="level4">
+<div class="panel">
+<h2>LEVEL 4 // SIGNAL RECOVERY</h2><p>SECURITY GATE OPEN.</p><p class="warning">The final transmission is fragmented.</p>
+<div class="row"><input id="signalSearch" placeholder="SEARCH SIGNAL ARCHIVE..."><button onclick="searchSignal()">SEARCH</button></div><div id="signalResults"></div>
+</div>
+<div class="panel">
+<h2>FINAL TRANSMISSION</h2><p class="small">Find all three signal fragments. Enter the exact transmission.</p>
+<div class="codebox">FOLLOW / THE / SIGNAL</div>
+<div class="row"><input id="signalInput" placeholder="ENTER FINAL TRANSMISSION"><button onclick="checkSignal()">TRANSMIT</button></div><div id="signalMsg"></div>
+</div>
+<div id="restorePanel" class="panel locked">
+<h2>RESTORATION PROTOCOL</h2><p class="small">Signal accepted. Search the restoration file.</p>
+<div class="row"><input id="restoreSearch" placeholder="SEARCH RESTORE..."><button onclick="searchRestore()">SEARCH</button></div><div id="restoreResults"></div>
+<div class="row"><input id="restoreInput" placeholder="RESTORATION COMMAND"><button onclick="restoreSystem()">EXECUTE</button></div><div id="restoreMsg"></div>
+</div>
+</section>
+
+<div class="panel"><h2>SYSTEM LOG</h2><div id="terminalLog"></div></div>
+<footer>BLACKOUT // ESCAPE ROOM CONTROL SYSTEM // LOCAL MODE</footer>
+</main>
+
+<div id="finalOverlay" class="hidden"><div class="finalBox"><div class="small">BLACKOUT EMERGENCY PROTOCOL</div><h1>SYSTEM RESTORED</h1><p>FACILITY CONNECTION RE-ESTABLISHED.</p><p>POWER GRID: ONLINE<br>SECURITY: RESTORED<br>TRANSMISSION: RECEIVED</p><p class="small">MISSION COMPLETE</p><button onclick="location.reload()">RESTART SIMULATION</button></div></div>
+
+<script>
+let power=false,binarySolved=false,deviceFound=false,accessGranted=false,signalSolved=false,restoreFound=false;
+const db={
+binary:["BINARY SYSTEMS","Binary uses 0 and 1. For this game use 5-bit values with A=1 through Z=26."],
+device:["DEVICE RECOVERY LOG","A damaged recovery device was found. Its second clue is physical. Decode the binary message hidden in the room to obtain the access word."],
+signal:["SIGNAL ARCHIVE","FINAL SIGNAL PARTS DETECTED: FOLLOW / THE / SIGNAL. The transmission must be entered exactly."],
+restore:["RESTORATION FILE","RESTORATION COMMAND: RESTART. The command executes only after the final transmission is accepted."],
+power:["POWER GRID LOG","Circuit integrity depends on conductive material completing the path."],
+blackout:["BLACKOUT INCIDENT","Recovery requires power, terminal access, signal recovery, and a final restart command."]
+};
+const norm=s=>s.trim().toUpperCase().replace(/\s+/g," ");
+function log(s){let x=document.createElement("div");x.textContent="> "+s;terminalLog.appendChild(x);terminalLog.scrollTop=terminalLog.scrollHeight}
+function powerRestored(){power=true;powerMsg.innerHTML='<span class="unlock">✓ POWER RESTORED. EXIT LIGHT ON. MESSAGE: ACCESS THE TERMINAL.</span>';level3.style.display="block";p2.className="step done";p3.className="step active";log("LEVEL 2 COMPLETE — TERMINAL POWER RESTORED.");searchBox.focus()}
+function searchDB(){let q=norm(searchBox.value),o=results;if(!q){o.innerHTML='<div class="result danger">ENTER A SEARCH TERM.</div>';return}let d=db[q.toLowerCase()];if(d){o.innerHTML='<div class="result"><span class="badge">CLASSIFIED RECORD</span><h3>'+d[0]+'</h3><p>'+d[1]+'</p></div>';log("DATABASE SEARCH: "+q);if(q==="DEVICE"){deviceFound=true;log("PHYSICAL CLUE REQUIRED: SECOND BINARY MESSAGE.")}}else o.innerHTML='<div class="result danger">NO RECORD FOUND FOR: '+q+'</div>'}
+function decodeBinary(){let raw=binaryInput.value.trim(),groups=raw.split(/\s+/),r="";if(!raw){decodeOutput.textContent="NO INPUT.";return}for(let g of groups){if(!/^[01]{5}$/.test(g)){decodeOutput.textContent="ERROR: USE 5-BIT GROUPS.";return}let n=parseInt(g,2);if(n<1||n>26){decodeOutput.textContent="ERROR: VALUE OUTSIDE A-Z RANGE.";return}r+=String.fromCharCode(64+n)}decodeOutput.textContent=r;log("BINARY DECODED: "+r);
+if(r==="HIDE"){binarySolved=true;decodeOutput.innerHTML='<span class="unlock">HIDE</span><br><br>HIDDEN CLUE: SEARCH <b>DEVICE</b>.';log("FIRST BINARY CLUE ACCEPTED.")}
+if(r==="OPEN"){if(deviceFound){binarySolved=true;decodeOutput.innerHTML='<span class="unlock">OPEN</span><br><br>SECURITY ACCESS WORD CONFIRMED.';securityPanel.classList.remove("locked");log("SECOND BINARY CLUE ACCEPTED — SECURITY GATE READY.")}else decodeOutput.innerHTML='<span class="warning">OPEN DETECTED, BUT THE DEVICE CLUE HAS NOT BEEN FOUND.</span>'}}
+function openGate(){if(norm(accessInput.value)==="OPEN"&&binarySolved&&deviceFound){accessGranted=true;accessMsg.innerHTML='<span class="unlock">✓ SECURITY GATE OPEN.</span>';level4.style.display="block";p3.className="step done";p4.className="step active";log("LEVEL 3 COMPLETE — SECURITY GATE OPEN.");signalSearch.focus()}else accessMsg.innerHTML='<span class="danger">ACCESS DENIED.</span>'}
+function searchSignal(){if(norm(signalSearch.value)==="SIGNAL"){signalResults.innerHTML='<div class="result"><span class="badge">TRANSMISSION ARCHIVE</span><h3>SIGNAL FRAGMENTS</h3><p>FRAGMENT 01: FOLLOW<br>FRAGMENT 02: THE<br>FRAGMENT 03: SIGNAL</p></div>';log("SIGNAL ARCHIVE ACCESSED.")}else signalResults.innerHTML='<div class="result danger">SEARCH: SIGNAL</div>'}
+function checkSignal(){if(norm(signalInput.value)==="FOLLOW THE SIGNAL"&&accessGranted){signalSolved=true;signalMsg.innerHTML='<span class="unlock">✓ TRANSMISSION ACCEPTED.</span>';restorePanel.classList.remove("locked");log("FINAL TRANSMISSION ACCEPTED: FOLLOW THE SIGNAL.")}else signalMsg.innerHTML='<span class="danger">TRANSMISSION REJECTED.</span>'}
+function searchRestore(){if(norm(restoreSearch.value)==="RESTORE"&&signalSolved){restoreFound=true;restoreResults.innerHTML='<div class="result"><span class="badge">RESTORATION FILE</span><h3>FINAL COMMAND</h3><p>RESTORATION COMMAND: <b>RESTART</b></p></div>';log("RESTORATION FILE FOUND.")}else restoreResults.innerHTML='<div class="result danger">NO FILE FOUND. SEARCH: RESTORE</div>'}
+function restoreSystem(){if(norm(restoreInput.value)==="RESTART"&&signalSolved&&restoreFound){p4.className="step done";pc.className="step done";log("RESTORATION COMMAND ACCEPTED: RESTART.");log("BLACKOUT SYSTEM RESTORED.");finalOverlay.classList.remove("hidden")}else restoreMsg.innerHTML='<span class="danger">COMMAND REJECTED. COMPLETE THE RECOVERY CHAIN FIRST.</span>'}
+searchBox.addEventListener("keydown",e=>{if(e.key==="Enter")searchDB()});binaryInput.addEventListener("keydown",e=>{if(e.key==="Enter")decodeBinary()});accessInput.addEventListener("keydown",e=>{if(e.key==="Enter")openGate()});signalSearch.addEventListener("keydown",e=>{if(e.key==="Enter")searchSignal()});signalInput.addEventListener("keydown",e=>{if(e.key==="Enter")checkSignal()});restoreSearch.addEventListener("keydown",e=>{if(e.key==="Enter")searchRestore()});restoreInput.addEventListener("keydown",e=>{if(e.key==="Enter")restoreSystem()});
+setTimeout(()=>boot.classList.add("hidden"),2600);log("TERMINAL READY.");log("WAITING FOR PHYSICAL POWER RESTORATION...");
+</script>
+</body>
+</html>
